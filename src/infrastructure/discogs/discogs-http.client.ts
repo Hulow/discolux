@@ -12,6 +12,10 @@ export class DiscogsHttpClient implements DiscogsClient {
     return this.request(`/releases/${releaseId}`);
   }
 
+  getReleaseCommunityRating(releaseId: string): Promise<unknown> {
+    return this.request(`/releases/${releaseId}/rating`);
+  }
+
   private async request(path: string): Promise<unknown> {
     const response = await fetch(this.buildUrl(path), {
       headers: {

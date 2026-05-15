@@ -9,6 +9,7 @@ describe('Release (e2e)', () => {
   let app: INestApplication<App>;
   const apiKey = 'test-api-key';
   const discogsRelease = { id: 12345, title: 'Test Release' };
+  const discogsRating = { rating: { average: 4.5, count: 10 } };
 
   beforeEach(async () => {
     process.env.API_KEY = apiKey;
@@ -20,6 +21,7 @@ describe('Release (e2e)', () => {
       .overrideProvider(DISCOGS_CLIENT)
       .useValue({
         getRelease: () => Promise.resolve(discogsRelease),
+        getReleaseCommunityRating: () => Promise.resolve(discogsRating),
       })
       .compile();
 
@@ -50,5 +52,26 @@ describe('Release (e2e)', () => {
       .set('x-api-key', apiKey)
       .expect(200)
       .expect(discogsRelease);
+  });
+
+  it('GET /community/rating/release/:releaseId returns 401 without api key', () => {
+    return request(app.getHttpServer())
+      .get('/community/rating/release/12345')
+      .expect(401);
+  });
+
+  it('GET /community/rating/release/:releaseId returns 401 with invalid api key', () => {
+    return request(app.getHttpServer())
+      .get('/community/rating/release/12345')
+      .set('x-api-key', 'wrong-key')
+      .expect(401);
+  });
+
+  it('GET /community/rating/release/:releaseId returns discogs rating with valid api key', () => {
+    return request(app.getHttpServer())
+      .get('/community/rating/release/12345')
+      .set('x-api-key', apiKey)
+      .expect(200)
+      .expect(discogsRating);
   });
 });

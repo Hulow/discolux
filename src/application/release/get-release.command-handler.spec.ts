@@ -12,6 +12,10 @@ class DiscogsClientStub implements DiscogsClient {
   getRelease(_releaseId: string): Promise<unknown> {
     return Promise.resolve(this.release);
   }
+
+  getReleaseCommunityRating(_releaseId: string): Promise<unknown> {
+    return Promise.resolve(null);
+  }
 }
 
 describe('GetReleaseCommandHandler', () => {
