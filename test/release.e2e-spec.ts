@@ -2,18 +2,26 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
+import { DISCOGS_CLIENT } from '../src/application/release/ports/discogs-client.port';
 import { AppModule } from '../src/app.module';
 
 describe('Release (e2e)', () => {
   let app: INestApplication<App>;
   const apiKey = 'test-api-key';
+  const discogsRelease = { id: 12345, title: 'Test Release' };
 
   beforeEach(async () => {
     process.env.API_KEY = apiKey;
+    process.env.DISCOGS_TOKEN = 'test-discogs-token';
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(DISCOGS_CLIENT)
+      .useValue({
+        getRelease: () => Promise.resolve(discogsRelease),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -22,6 +30,7 @@ describe('Release (e2e)', () => {
   afterEach(async () => {
     await app.close();
     delete process.env.API_KEY;
+    delete process.env.DISCOGS_TOKEN;
   });
 
   it('GET /release/:id returns 401 without api key', () => {
@@ -35,11 +44,11 @@ describe('Release (e2e)', () => {
       .expect(401);
   });
 
-  it('GET /release/:id returns release id with valid api key', () => {
+  it('GET /release/:id returns discogs release with valid api key', () => {
     return request(app.getHttpServer())
       .get('/release/12345')
       .set('x-api-key', apiKey)
       .expect(200)
-      .expect({ releaseId: '12345' });
+      .expect(discogsRelease);
   });
 });
