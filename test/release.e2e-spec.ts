@@ -10,6 +10,7 @@ describe('Release (e2e)', () => {
   const apiKey = 'test-api-key';
   const discogsRelease = { id: 12345, title: 'Test Release' };
   const discogsRating = { rating: { average: 4.5, count: 10 } };
+  const discogsListing = { id: 98765, price: { value: 12.5, currency: 'USD' } };
 
   beforeEach(async () => {
     process.env.API_KEY = apiKey;
@@ -22,6 +23,7 @@ describe('Release (e2e)', () => {
       .useValue({
         getRelease: () => Promise.resolve(discogsRelease),
         getReleaseCommunityRating: () => Promise.resolve(discogsRating),
+        getMarketplaceListing: () => Promise.resolve(discogsListing),
       })
       .compile();
 
@@ -73,5 +75,26 @@ describe('Release (e2e)', () => {
       .set('x-api-key', apiKey)
       .expect(200)
       .expect(discogsRating);
+  });
+
+  it('GET /release/listing/:listingId returns 401 without api key', () => {
+    return request(app.getHttpServer())
+      .get('/release/listing/98765')
+      .expect(401);
+  });
+
+  it('GET /release/listing/:listingId returns 401 with invalid api key', () => {
+    return request(app.getHttpServer())
+      .get('/release/listing/98765')
+      .set('x-api-key', 'wrong-key')
+      .expect(401);
+  });
+
+  it('GET /release/listing/:listingId returns discogs listing with valid api key', () => {
+    return request(app.getHttpServer())
+      .get('/release/listing/98765')
+      .set('x-api-key', apiKey)
+      .expect(200)
+      .expect(discogsListing);
   });
 });

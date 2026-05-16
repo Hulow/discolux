@@ -16,6 +16,10 @@ class DiscogsClientStub implements DiscogsClient {
   getReleaseCommunityRating(_releaseId: string): Promise<unknown> {
     return Promise.resolve(this.rating);
   }
+
+  getMarketplaceListing(_listingId: string): Promise<unknown> {
+    return Promise.resolve(null);
+  }
 }
 
 describe('GetReleaseCommunityRatingQueryHandler', () => {
