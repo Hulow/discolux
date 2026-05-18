@@ -1,22 +1,6 @@
+import { ReleaseDiscogsClientStub } from '../infrastructure/discogs/release-discogs-client.stub';
 import { GetReleaseQuery } from './get-release.query';
 import { GetReleaseQueryHandler } from './get-release.query-handler';
-import { ReleaseDiscogsClient } from './ports/release-discogs-client.port';
-
-class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
-  private release: unknown = null;
-
-  setRelease(release: unknown): void {
-    this.release = release;
-  }
-
-  getRelease(_releaseId: string): Promise<unknown> {
-    return Promise.resolve(this.release);
-  }
-
-  getReleaseCommunityRating(_releaseId: string): Promise<unknown> {
-    return Promise.resolve(null);
-  }
-}
 
 describe('GetReleaseQueryHandler', () => {
   const discogsClient = new ReleaseDiscogsClientStub();

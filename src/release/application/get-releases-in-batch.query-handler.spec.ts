@@ -1,33 +1,6 @@
+import { ReleaseDiscogsClientStub } from '../infrastructure/discogs/release-discogs-client.stub';
 import { GetReleasesInBatchQuery } from './get-releases-in-batch.query';
 import { GetReleasesInBatchQueryHandler } from './get-releases-in-batch.query-handler';
-import { ReleaseDiscogsClient } from './ports/release-discogs-client.port';
-
-class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
-  private releases = new Map<string, unknown>();
-  private failures = new Map<string, Error>();
-
-  setRelease(releaseId: string, release: unknown): void {
-    this.releases.set(releaseId, release);
-  }
-
-  failRelease(releaseId: string, error: Error): void {
-    this.failures.set(releaseId, error);
-  }
-
-  getRelease(releaseId: string): Promise<unknown> {
-    const failure = this.failures.get(releaseId);
-
-    if (failure) {
-      return Promise.reject(failure);
-    }
-
-    return Promise.resolve(this.releases.get(releaseId) ?? null);
-  }
-
-  getReleaseCommunityRating(_releaseId: string): Promise<unknown> {
-    return Promise.resolve(null);
-  }
-}
 
 describe('GetReleasesInBatchQueryHandler', () => {
   const discogsClient = new ReleaseDiscogsClientStub();

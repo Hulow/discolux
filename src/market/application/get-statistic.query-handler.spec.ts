@@ -1,22 +1,6 @@
+import { MarketDiscogsClientStub } from '../infrastructure/discogs/market-discogs-client.stub';
 import { GetStatisticQuery } from './get-statistic.query';
 import { GetStatisticQueryHandler } from './get-statistic.query-handler';
-import { MarketDiscogsClient } from './ports/market-discogs-client.port';
-
-class MarketDiscogsClientStub implements MarketDiscogsClient {
-  private stats: unknown = null;
-
-  setStats(stats: unknown): void {
-    this.stats = stats;
-  }
-
-  getMarketplaceListing(_listingId: string): Promise<unknown> {
-    return Promise.resolve(null);
-  }
-
-  getReleaseMarketplaceStats(_releaseId: string): Promise<unknown> {
-    return Promise.resolve(this.stats);
-  }
-}
 
 describe('GetStatisticQueryHandler', () => {
   const discogsClient = new MarketDiscogsClientStub();

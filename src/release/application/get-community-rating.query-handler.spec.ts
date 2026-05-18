@@ -1,22 +1,6 @@
+import { ReleaseDiscogsClientStub } from '../infrastructure/discogs/release-discogs-client.stub';
 import { GetCommunityRatingQuery } from './get-community-rating.query';
 import { GetCommunityRatingQueryHandler } from './get-community-rating.query-handler';
-import { ReleaseDiscogsClient } from './ports/release-discogs-client.port';
-
-class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
-  private rating: unknown = null;
-
-  setRating(rating: unknown): void {
-    this.rating = rating;
-  }
-
-  getRelease(_releaseId: string): Promise<unknown> {
-    return Promise.resolve(null);
-  }
-
-  getReleaseCommunityRating(_releaseId: string): Promise<unknown> {
-    return Promise.resolve(this.rating);
-  }
-}
 
 describe('GetCommunityRatingQueryHandler', () => {
   const discogsClient = new ReleaseDiscogsClientStub();

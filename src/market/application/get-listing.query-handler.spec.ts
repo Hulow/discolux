@@ -1,22 +1,6 @@
+import { MarketDiscogsClientStub } from '../infrastructure/discogs/market-discogs-client.stub';
 import { GetListingQuery } from './get-listing.query';
 import { GetListingQueryHandler } from './get-listing.query-handler';
-import { MarketDiscogsClient } from './ports/market-discogs-client.port';
-
-class MarketDiscogsClientStub implements MarketDiscogsClient {
-  private listing: unknown = null;
-
-  setListing(listing: unknown): void {
-    this.listing = listing;
-  }
-
-  getMarketplaceListing(_listingId: string): Promise<unknown> {
-    return Promise.resolve(this.listing);
-  }
-
-  getReleaseMarketplaceStats(_releaseId: string): Promise<unknown> {
-    return Promise.resolve(null);
-  }
-}
 
 describe('GetListingQueryHandler', () => {
   const discogsClient = new MarketDiscogsClientStub();
