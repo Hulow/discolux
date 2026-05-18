@@ -167,4 +167,54 @@ describe('Release (e2e)', () => {
       .set('x-api-key', apiKey)
       .expect(400);
   });
+
+  describe('when a release id fails upstream', () => {
+    const discogsNotFoundError = new Error(
+      'Discogs API request failed: 404 Not Found',
+    );
+
+    beforeEach(async () => {
+      await app.close();
+
+      process.env.API_KEY = apiKey;
+      process.env.DISCOGS_TOKEN = 'test-discogs-token';
+
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+      })
+        .overrideProvider(DISCOGS_CLIENT)
+        .useValue({
+          getRelease: (releaseId: string) =>
+            releaseId === '2'
+              ? Promise.reject(discogsNotFoundError)
+              : Promise.resolve({
+                  id: Number(releaseId),
+                  title: 'Test Release',
+                }),
+          getReleaseCommunityRating: () => Promise.resolve(discogsRating),
+          getMarketplaceListing: () => Promise.resolve(discogsListing),
+          getReleaseMarketplaceStats: () => Promise.resolve(discogsStats),
+        })
+        .compile();
+
+      app = moduleFixture.createNestApplication();
+      await app.init();
+    });
+
+    it('GET /release/batch returns 200 with error object for failed id', () => {
+      return request(app.getHttpServer())
+        .get('/release/batch')
+        .query({ from: '1', till: '3' })
+        .set('x-api-key', apiKey)
+        .expect(200)
+        .expect([
+          { id: 1, title: 'Test Release' },
+          {
+            releaseId: '2',
+            errorMessage: 'Discogs API request failed: 404 Not Found',
+          },
+          { id: 3, title: 'Test Release' },
+        ]);
+    });
+  });
 });

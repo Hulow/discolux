@@ -3,7 +3,12 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetReleasesInBatchQuery } from './get-releases-in-batch.query';
 import { DISCOGS_CLIENT, DiscogsClient } from './ports/discogs-client.port';
 
-export type GetReleasesInBatchResult = unknown[];
+export type BatchReleaseError = {
+  releaseId: string;
+  errorMessage: string;
+};
+
+export type GetReleasesInBatchResult = (unknown | BatchReleaseError)[];
 
 @QueryHandler(GetReleasesInBatchQuery)
 export class GetReleasesInBatchQueryHandler
@@ -22,6 +27,13 @@ export class GetReleasesInBatchQueryHandler
       ids.push(String(id));
     }
 
-    return Promise.all(ids.map((id) => this.discogsClient.getRelease(id)));
+    return Promise.all(ids.map((id) => this.fetchRelease(id)));
+  }
+
+  private fetchRelease(releaseId: string): Promise<unknown | BatchReleaseError> {
+    return this.discogsClient.getRelease(releaseId).catch((error: unknown) => ({
+      releaseId,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    }));
   }
 }

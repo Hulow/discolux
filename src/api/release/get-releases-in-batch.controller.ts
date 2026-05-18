@@ -76,10 +76,26 @@ export class GetReleasesInBatchController {
     required: true,
   })
   @ApiOkResponse({
-    description: 'Array of Discogs release JSON payloads in ascending ID order',
+    description:
+      'Array in ascending ID order: Discogs release JSON on success, or { releaseId, errorMessage } when upstream fetch failed',
     schema: {
       type: 'array',
-      items: { type: 'object', additionalProperties: true },
+      items: {
+        oneOf: [
+          { type: 'object', additionalProperties: true },
+          {
+            type: 'object',
+            required: ['releaseId', 'errorMessage'],
+            properties: {
+              releaseId: { type: 'string', example: '2' },
+              errorMessage: {
+                type: 'string',
+                example: 'Discogs API request failed: 404 Not Found',
+              },
+            },
+          },
+        ],
+      },
     },
   })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid x-api-key' })
