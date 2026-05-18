@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
-import { DISCOGS_CLIENT } from '../src/application/release/ports/discogs-client.port';
+import { RELEASE_DISCOGS_CLIENT } from '../src/release/application/ports/release-discogs-client.port';
 import { AppModule } from '../src/app.module';
 
 describe('Release (e2e)', () => {
@@ -10,12 +10,6 @@ describe('Release (e2e)', () => {
   const apiKey = 'test-api-key';
   const discogsRelease = { id: 12345, title: 'Test Release' };
   const discogsRating = { rating: { average: 4.5, count: 10 } };
-  const discogsListing = { id: 98765, price: { value: 12.5, currency: 'USD' } };
-  const discogsStats = {
-    lowest_price: { value: 10, currency: 'USD' },
-    num_for_sale: 3,
-    blocked_from_sale: false,
-  };
 
   beforeEach(async () => {
     process.env.API_KEY = apiKey;
@@ -24,7 +18,7 @@ describe('Release (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(DISCOGS_CLIENT)
+      .overrideProvider(RELEASE_DISCOGS_CLIENT)
       .useValue({
         getRelease: (releaseId: string) =>
           Promise.resolve({
@@ -32,8 +26,6 @@ describe('Release (e2e)', () => {
             title: 'Test Release',
           }),
         getReleaseCommunityRating: () => Promise.resolve(discogsRating),
-        getMarketplaceListing: () => Promise.resolve(discogsListing),
-        getReleaseMarketplaceStats: () => Promise.resolve(discogsStats),
       })
       .compile();
 
@@ -87,51 +79,6 @@ describe('Release (e2e)', () => {
       .expect(discogsRating);
   });
 
-  it('GET /release/listing/:listingId returns 401 without api key', () => {
-    return request(app.getHttpServer())
-      .get('/release/listing/98765')
-      .expect(401);
-  });
-
-  it('GET /release/listing/:listingId returns 401 with invalid api key', () => {
-    return request(app.getHttpServer())
-      .get('/release/listing/98765')
-      .set('x-api-key', 'wrong-key')
-      .expect(401);
-  });
-
-  it('GET /release/listing/:listingId returns discogs listing with valid api key', () => {
-    return request(app.getHttpServer())
-      .get('/release/listing/98765')
-      .set('x-api-key', apiKey)
-      .expect(200)
-      .expect(discogsListing);
-  });
-
-  it('GET /release/statistic returns 401 without api key', () => {
-    return request(app.getHttpServer())
-      .get('/release/statistic')
-      .query({ releaseId: '12345' })
-      .expect(401);
-  });
-
-  it('GET /release/statistic returns 401 with invalid api key', () => {
-    return request(app.getHttpServer())
-      .get('/release/statistic')
-      .query({ releaseId: '12345' })
-      .set('x-api-key', 'wrong-key')
-      .expect(401);
-  });
-
-  it('GET /release/statistic returns discogs marketplace stats with valid api key', () => {
-    return request(app.getHttpServer())
-      .get('/release/statistic')
-      .query({ releaseId: '12345' })
-      .set('x-api-key', apiKey)
-      .expect(200)
-      .expect(discogsStats);
-  });
-
   it('GET /release/batch returns 401 without api key', () => {
     return request(app.getHttpServer())
       .get('/release/batch')
@@ -182,7 +129,7 @@ describe('Release (e2e)', () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
       })
-        .overrideProvider(DISCOGS_CLIENT)
+        .overrideProvider(RELEASE_DISCOGS_CLIENT)
         .useValue({
           getRelease: (releaseId: string) =>
             releaseId === '2'
@@ -192,8 +139,6 @@ describe('Release (e2e)', () => {
                   title: 'Test Release',
                 }),
           getReleaseCommunityRating: () => Promise.resolve(discogsRating),
-          getMarketplaceListing: () => Promise.resolve(discogsListing),
-          getReleaseMarketplaceStats: () => Promise.resolve(discogsStats),
         })
         .compile();
 
