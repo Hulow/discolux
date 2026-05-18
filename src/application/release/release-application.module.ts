@@ -4,6 +4,7 @@ import { GetReleaseCommandHandler } from './get-release.command-handler';
 import { GetReleaseCommunityRatingQueryHandler } from './get-release-community-rating.query-handler';
 import { GetReleaseListingQueryHandler } from './get-release-listing.query-handler';
 import { GetReleaseStatisticQueryHandler } from './get-release-statistic.query-handler';
+import { GetReleasesInBatchQueryHandler } from './get-releases-in-batch.query-handler';
 
 @Module({
   imports: [DiscogsModule],
@@ -12,6 +13,7 @@ import { GetReleaseStatisticQueryHandler } from './get-release-statistic.query-h
     GetReleaseCommunityRatingQueryHandler,
     GetReleaseListingQueryHandler,
     GetReleaseStatisticQueryHandler,
+    GetReleasesInBatchQueryHandler,
   ],
 })
 export class ReleaseApplicationModule {}

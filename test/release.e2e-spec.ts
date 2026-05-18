@@ -26,7 +26,11 @@ describe('Release (e2e)', () => {
     })
       .overrideProvider(DISCOGS_CLIENT)
       .useValue({
-        getRelease: () => Promise.resolve(discogsRelease),
+        getRelease: (releaseId: string) =>
+          Promise.resolve({
+            id: Number(releaseId),
+            title: 'Test Release',
+          }),
         getReleaseCommunityRating: () => Promise.resolve(discogsRating),
         getMarketplaceListing: () => Promise.resolve(discogsListing),
         getReleaseMarketplaceStats: () => Promise.resolve(discogsStats),
@@ -126,5 +130,41 @@ describe('Release (e2e)', () => {
       .set('x-api-key', apiKey)
       .expect(200)
       .expect(discogsStats);
+  });
+
+  it('GET /release/batch returns 401 without api key', () => {
+    return request(app.getHttpServer())
+      .get('/release/batch')
+      .query({ from: '1', till: '3' })
+      .expect(401);
+  });
+
+  it('GET /release/batch returns releases in ascending id order with valid api key', () => {
+    return request(app.getHttpServer())
+      .get('/release/batch')
+      .query({ from: '1', till: '3' })
+      .set('x-api-key', apiKey)
+      .expect(200)
+      .expect([
+        { id: 1, title: 'Test Release' },
+        { id: 2, title: 'Test Release' },
+        { id: 3, title: 'Test Release' },
+      ]);
+  });
+
+  it('GET /release/batch returns 400 when from is greater than till', () => {
+    return request(app.getHttpServer())
+      .get('/release/batch')
+      .query({ from: '61', till: '1' })
+      .set('x-api-key', apiKey)
+      .expect(400);
+  });
+
+  it('GET /release/batch returns 400 when range size exceeds 60', () => {
+    return request(app.getHttpServer())
+      .get('/release/batch')
+      .query({ from: '1', till: '61' })
+      .set('x-api-key', apiKey)
+      .expect(400);
   });
 });
