@@ -3,13 +3,28 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { RELEASE_DISCOGS_CLIENT } from '../src/release/application/ports/release-discogs-client.port';
+import { ReleaseEntity } from '../src/release/domain/release.entity';
 import { AppModule } from '../src/app.module';
 
 describe('Release (e2e)', () => {
   let app: INestApplication<App>;
   const apiKey = 'test-api-key';
-  const discogsRelease = { id: 12345, title: 'Test Release' };
   const discogsRating = { rating: { average: 4.5, count: 10 } };
+
+  const releaseEntity = (releaseId: number) =>
+    ReleaseEntity.from({
+      id: `e2e-release-${releaseId}`,
+      releaseId,
+      createdAt: new Date('2020-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2020-01-01T00:00:00.000Z'),
+    });
+
+  const releaseJson = (releaseId: number) => ({
+    id: `e2e-release-${releaseId}`,
+    releaseId,
+    createdAt: '2020-01-01T00:00:00.000Z',
+    updatedAt: '2020-01-01T00:00:00.000Z',
+  });
 
   beforeEach(async () => {
     process.env.API_KEY = apiKey;
@@ -21,10 +36,7 @@ describe('Release (e2e)', () => {
       .overrideProvider(RELEASE_DISCOGS_CLIENT)
       .useValue({
         getRelease: (releaseId: string) =>
-          Promise.resolve({
-            id: Number(releaseId),
-            title: 'Test Release',
-          }),
+          Promise.resolve(releaseEntity(Number(releaseId))),
         getReleaseCommunityRating: () => Promise.resolve(discogsRating),
       })
       .compile();
@@ -54,13 +66,13 @@ describe('Release (e2e)', () => {
       .expect(401);
   });
 
-  it('GET /release?id= returns discogs release with valid api key', () => {
+  it('GET /release?id= returns release entity with valid api key', () => {
     return request(app.getHttpServer())
       .get('/release')
       .query({ id: '12345' })
       .set('x-api-key', apiKey)
       .expect(200)
-      .expect(discogsRelease);
+      .expect(releaseJson(12345));
   });
 
   it('GET /community/rating/release?releaseId= returns 401 without api key', () => {
@@ -100,11 +112,7 @@ describe('Release (e2e)', () => {
       .query({ from: '1', till: '3' })
       .set('x-api-key', apiKey)
       .expect(200)
-      .expect([
-        { id: 1, title: 'Test Release' },
-        { id: 2, title: 'Test Release' },
-        { id: 3, title: 'Test Release' },
-      ]);
+      .expect([releaseJson(1), releaseJson(2), releaseJson(3)]);
   });
 
   it('GET /release/batch returns 400 when from is greater than till', () => {
@@ -142,10 +150,7 @@ describe('Release (e2e)', () => {
           getRelease: (releaseId: string) =>
             releaseId === '2'
               ? Promise.reject(discogsNotFoundError)
-              : Promise.resolve({
-                  id: Number(releaseId),
-                  title: 'Test Release',
-                }),
+              : Promise.resolve(releaseEntity(Number(releaseId))),
           getReleaseCommunityRating: () => Promise.resolve(discogsRating),
         })
         .compile();
@@ -161,12 +166,12 @@ describe('Release (e2e)', () => {
         .set('x-api-key', apiKey)
         .expect(200)
         .expect([
-          { id: 1, title: 'Test Release' },
+          releaseJson(1),
           {
             releaseId: '2',
             errorMessage: 'Discogs API request failed: 404 Not Found',
           },
-          { id: 3, title: 'Test Release' },
+          releaseJson(3),
         ]);
     });
   });

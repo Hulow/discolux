@@ -1,13 +1,13 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import type { ReleaseEntity } from '../domain/release.entity';
 import { GetReleaseQuery } from './get-release.query';
-import type { DiscogsReleaseResponse } from '../infrastructure/discogs/mappers/release-discogs.mapper';
 import {
   RELEASE_DISCOGS_CLIENT,
   ReleaseDiscogsClient,
 } from './ports/release-discogs-client.port';
 
-export type GetReleaseResult = DiscogsReleaseResponse;
+export type GetReleaseResult = ReleaseEntity;
 
 @QueryHandler(GetReleaseQuery)
 export class GetReleaseQueryHandler

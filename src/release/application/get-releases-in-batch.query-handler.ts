@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import type { ReleaseEntity } from '../domain/release.entity';
 import { GetReleasesInBatchQuery } from './get-releases-in-batch.query';
-import type { DiscogsReleaseResponse } from '../infrastructure/discogs/mappers/release-discogs.mapper';
 import {
   RELEASE_DISCOGS_CLIENT,
   ReleaseDiscogsClient,
@@ -13,7 +13,7 @@ export type BatchReleaseError = {
 };
 
 export type GetReleasesInBatchResult = (
-  | DiscogsReleaseResponse
+  | ReleaseEntity
   | BatchReleaseError
 )[];
 
@@ -40,7 +40,7 @@ export class GetReleasesInBatchQueryHandler
 
   private fetchRelease(
     releaseId: string,
-  ): Promise<DiscogsReleaseResponse | BatchReleaseError> {
+  ): Promise<ReleaseEntity | BatchReleaseError> {
     return this.discogsClient.getRelease(releaseId).catch((error: unknown) => ({
       releaseId,
       errorMessage: error instanceof Error ? error.message : String(error),
