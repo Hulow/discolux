@@ -1,5 +1,5 @@
-import { GetReleaseCommand } from './get-release.command';
-import { GetReleaseCommandHandler } from './get-release.command-handler';
+import { GetReleaseQuery } from './get-release.query';
+import { GetReleaseQueryHandler } from './get-release.query-handler';
 import { ReleaseDiscogsClient } from './ports/release-discogs-client.port';
 
 class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
@@ -18,15 +18,15 @@ class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
   }
 }
 
-describe('GetReleaseCommandHandler', () => {
+describe('GetReleaseQueryHandler', () => {
   const discogsClient = new ReleaseDiscogsClientStub();
-  const handler = new GetReleaseCommandHandler(discogsClient);
+  const handler = new GetReleaseQueryHandler(discogsClient);
 
-  it('should_return_discogs_release_when_command_executed', async () => {
+  it('should_return_discogs_release_when_query_executed', async () => {
     const release = { id: 12345, title: 'Test Release' };
     discogsClient.setRelease(release);
 
-    const result = await handler.execute(new GetReleaseCommand('12345'));
+    const result = await handler.execute(new GetReleaseQuery('12345'));
 
     expect(result).toEqual(release);
   });

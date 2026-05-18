@@ -1,5 +1,5 @@
-import { GetReleaseCommunityRatingQuery } from './get-release-community-rating.query';
-import { GetReleaseCommunityRatingQueryHandler } from './get-release-community-rating.query-handler';
+import { GetCommunityRatingQuery } from './get-community-rating.query';
+import { GetCommunityRatingQueryHandler } from './get-community-rating.query-handler';
 import { ReleaseDiscogsClient } from './ports/release-discogs-client.port';
 
 class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
@@ -18,16 +18,16 @@ class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
   }
 }
 
-describe('GetReleaseCommunityRatingQueryHandler', () => {
+describe('GetCommunityRatingQueryHandler', () => {
   const discogsClient = new ReleaseDiscogsClientStub();
-  const handler = new GetReleaseCommunityRatingQueryHandler(discogsClient);
+  const handler = new GetCommunityRatingQueryHandler(discogsClient);
 
   it('should_return_discogs_rating_when_query_executed', async () => {
     const rating = { rating: { average: 4.5, count: 10 } };
     discogsClient.setRating(rating);
 
     const result = await handler.execute(
-      new GetReleaseCommunityRatingQuery('12345'),
+      new GetCommunityRatingQuery('12345'),
     );
 
     expect(result).toEqual(rating);

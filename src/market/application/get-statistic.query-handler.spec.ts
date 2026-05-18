@@ -1,5 +1,5 @@
-import { GetReleaseStatisticQuery } from './get-release-statistic.query';
-import { GetReleaseStatisticQueryHandler } from './get-release-statistic.query-handler';
+import { GetStatisticQuery } from './get-statistic.query';
+import { GetStatisticQueryHandler } from './get-statistic.query-handler';
 import { MarketDiscogsClient } from './ports/market-discogs-client.port';
 
 class MarketDiscogsClientStub implements MarketDiscogsClient {
@@ -18,9 +18,9 @@ class MarketDiscogsClientStub implements MarketDiscogsClient {
   }
 }
 
-describe('GetReleaseStatisticQueryHandler', () => {
+describe('GetStatisticQueryHandler', () => {
   const discogsClient = new MarketDiscogsClientStub();
-  const handler = new GetReleaseStatisticQueryHandler(discogsClient);
+  const handler = new GetStatisticQueryHandler(discogsClient);
 
   it('should_return_discogs_marketplace_stats_when_query_executed', async () => {
     const stats = {
@@ -30,9 +30,7 @@ describe('GetReleaseStatisticQueryHandler', () => {
     };
     discogsClient.setStats(stats);
 
-    const result = await handler.execute(
-      new GetReleaseStatisticQuery('12345'),
-    );
+    const result = await handler.execute(new GetStatisticQuery('12345'));
 
     expect(result).toEqual(stats);
   });

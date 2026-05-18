@@ -1,3 +1,3 @@
-export class GetReleaseCommunityRatingQuery {
+export class GetReleaseQuery {
   constructor(public readonly releaseId: string) {}
 }

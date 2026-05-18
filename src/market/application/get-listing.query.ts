@@ -1,3 +1,3 @@
-export class GetReleaseListingQuery {
+export class GetListingQuery {
   constructor(public readonly listingId: string) {}
 }

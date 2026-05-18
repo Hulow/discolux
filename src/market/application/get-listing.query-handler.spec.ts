@@ -1,5 +1,5 @@
-import { GetReleaseListingQuery } from './get-release-listing.query';
-import { GetReleaseListingQueryHandler } from './get-release-listing.query-handler';
+import { GetListingQuery } from './get-listing.query';
+import { GetListingQueryHandler } from './get-listing.query-handler';
 import { MarketDiscogsClient } from './ports/market-discogs-client.port';
 
 class MarketDiscogsClientStub implements MarketDiscogsClient {
@@ -18,15 +18,15 @@ class MarketDiscogsClientStub implements MarketDiscogsClient {
   }
 }
 
-describe('GetReleaseListingQueryHandler', () => {
+describe('GetListingQueryHandler', () => {
   const discogsClient = new MarketDiscogsClientStub();
-  const handler = new GetReleaseListingQueryHandler(discogsClient);
+  const handler = new GetListingQueryHandler(discogsClient);
 
   it('should_return_discogs_listing_when_query_executed', async () => {
     const listing = { id: 98765, price: { value: 12.5, currency: 'USD' } };
     discogsClient.setListing(listing);
 
-    const result = await handler.execute(new GetReleaseListingQuery('98765'));
+    const result = await handler.execute(new GetListingQuery('98765'));
 
     expect(result).toEqual(listing);
   });

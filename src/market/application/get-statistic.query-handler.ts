@@ -1,25 +1,23 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetReleaseStatisticQuery } from './get-release-statistic.query';
+import { GetStatisticQuery } from './get-statistic.query';
 import {
   MARKET_DISCOGS_CLIENT,
   MarketDiscogsClient,
 } from './ports/market-discogs-client.port';
 
-export type GetReleaseStatisticResult = unknown;
+export type GetStatisticResult = unknown;
 
-@QueryHandler(GetReleaseStatisticQuery)
-export class GetReleaseStatisticQueryHandler
-  implements IQueryHandler<GetReleaseStatisticQuery, GetReleaseStatisticResult>
+@QueryHandler(GetStatisticQuery)
+export class GetStatisticQueryHandler
+  implements IQueryHandler<GetStatisticQuery, GetStatisticResult>
 {
   constructor(
     @Inject(MARKET_DISCOGS_CLIENT)
     private readonly discogsClient: MarketDiscogsClient,
   ) {}
 
-  execute(
-    query: GetReleaseStatisticQuery,
-  ): Promise<GetReleaseStatisticResult> {
+  execute(query: GetStatisticQuery): Promise<GetStatisticResult> {
     return this.discogsClient.getReleaseMarketplaceStats(query.releaseId);
   }
 }

@@ -39,22 +39,25 @@ describe('Market (e2e)', () => {
     delete process.env.DISCOGS_TOKEN;
   });
 
-  it('GET /release/listing/:listingId returns 401 without api key', () => {
+  it('GET /release/listing?listingId= returns 401 without api key', () => {
     return request(app.getHttpServer())
-      .get('/release/listing/98765')
+      .get('/release/listing')
+      .query({ listingId: '98765' })
       .expect(401);
   });
 
-  it('GET /release/listing/:listingId returns 401 with invalid api key', () => {
+  it('GET /release/listing?listingId= returns 401 with invalid api key', () => {
     return request(app.getHttpServer())
-      .get('/release/listing/98765')
+      .get('/release/listing')
+      .query({ listingId: '98765' })
       .set('x-api-key', 'wrong-key')
       .expect(401);
   });
 
-  it('GET /release/listing/:listingId returns discogs listing with valid api key', () => {
+  it('GET /release/listing?listingId= returns discogs listing with valid api key', () => {
     return request(app.getHttpServer())
-      .get('/release/listing/98765')
+      .get('/release/listing')
+      .query({ listingId: '98765' })
       .set('x-api-key', apiKey)
       .expect(200)
       .expect(discogsListing);

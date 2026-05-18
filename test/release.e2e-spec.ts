@@ -39,41 +39,49 @@ describe('Release (e2e)', () => {
     delete process.env.DISCOGS_TOKEN;
   });
 
-  it('GET /release/:id returns 401 without api key', () => {
-    return request(app.getHttpServer()).get('/release/12345').expect(401);
+  it('GET /release?id= returns 401 without api key', () => {
+    return request(app.getHttpServer())
+      .get('/release')
+      .query({ id: '12345' })
+      .expect(401);
   });
 
-  it('GET /release/:id returns 401 with invalid api key', () => {
+  it('GET /release?id= returns 401 with invalid api key', () => {
     return request(app.getHttpServer())
-      .get('/release/12345')
+      .get('/release')
+      .query({ id: '12345' })
       .set('x-api-key', 'wrong-key')
       .expect(401);
   });
 
-  it('GET /release/:id returns discogs release with valid api key', () => {
+  it('GET /release?id= returns discogs release with valid api key', () => {
     return request(app.getHttpServer())
-      .get('/release/12345')
+      .get('/release')
+      .query({ id: '12345' })
       .set('x-api-key', apiKey)
       .expect(200)
       .expect(discogsRelease);
   });
 
-  it('GET /community/rating/release/:releaseId returns 401 without api key', () => {
+  it('GET /community/rating/release?releaseId= returns 401 without api key', () => {
     return request(app.getHttpServer())
-      .get('/community/rating/release/12345')
+      .get('/community/rating/release')
+      .query({ releaseId: '12345' })
       .expect(401);
   });
 
-  it('GET /community/rating/release/:releaseId returns 401 with invalid api key', () => {
+  it('GET /community/rating/release?releaseId= returns 401 with invalid api key', () => {
     return request(app.getHttpServer())
-      .get('/community/rating/release/12345')
+      .get('/community/rating/release')
+      .query({ releaseId: '12345' })
       .set('x-api-key', 'wrong-key')
       .expect(401);
   });
 
-  it('GET /community/rating/release/:releaseId returns discogs rating with valid api key', () => {
+  it('GET /community/rating/release?releaseId= returns discogs rating with valid api key', () => {
     return request(app.getHttpServer())
-      .get('/community/rating/release/12345')
+      .get('/community/rating/release')
+      .query({ releaseId: '12345' })
       .set('x-api-key', apiKey)
       .expect(200)
       .expect(discogsRating);

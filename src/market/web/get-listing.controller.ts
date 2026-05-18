@@ -1,30 +1,31 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import {
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { GetReleaseListingQuery } from '../application/get-release-listing.query';
-import { GetReleaseListingResult } from '../application/get-release-listing.query-handler';
+import { GetListingQuery } from '../application/get-listing.query';
+import { GetListingResult } from '../application/get-listing.query-handler';
 import { ApiKeyGuard } from '../../shared/web/guards/api-key.guard';
 
-@ApiTags('release')
+@ApiTags('market')
 @ApiSecurity('x-api-key')
 @Controller('release/listing')
 @UseGuards(ApiKeyGuard)
-export class GetReleaseListingController {
+export class GetListingController {
   constructor(private readonly queryBus: QueryBus) {}
 
-  @Get(':listingId')
+  @Get()
   @ApiOperation({ summary: 'Get a Discogs marketplace listing by ID' })
-  @ApiParam({
+  @ApiQuery({
     name: 'listingId',
     description: 'Discogs marketplace listing ID',
     example: '98765',
+    required: true,
   })
   @ApiOkResponse({
     description: 'Discogs marketplace listing JSON payload',
@@ -32,8 +33,8 @@ export class GetReleaseListingController {
   })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid x-api-key' })
   getReleaseListing(
-    @Param('listingId') listingId: string,
-  ): Promise<GetReleaseListingResult> {
-    return this.queryBus.execute(new GetReleaseListingQuery(listingId));
+    @Query('listingId') listingId: string,
+  ): Promise<GetListingResult> {
+    return this.queryBus.execute(new GetListingQuery(listingId));
   }
 }

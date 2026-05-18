@@ -1,30 +1,31 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import {
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { GetReleaseCommunityRatingQuery } from '../application/get-release-community-rating.query';
-import { GetReleaseCommunityRatingResult } from '../application/get-release-community-rating.query-handler';
+import { GetCommunityRatingQuery } from '../application/get-community-rating.query';
+import { GetCommunityRatingResult } from '../application/get-community-rating.query-handler';
 import { ApiKeyGuard } from '../../shared/web/guards/api-key.guard';
 
 @ApiTags('release')
 @ApiSecurity('x-api-key')
 @Controller('community/rating/release')
 @UseGuards(ApiKeyGuard)
-export class GetReleaseCommunityRatingController {
+export class GetCommunityRatingController {
   constructor(private readonly queryBus: QueryBus) {}
 
-  @Get(':releaseId')
+  @Get()
   @ApiOperation({ summary: 'Get Discogs community rating for a release' })
-  @ApiParam({
+  @ApiQuery({
     name: 'releaseId',
     description: 'Discogs release ID',
     example: '12345',
+    required: true,
   })
   @ApiOkResponse({
     description: 'Discogs release community rating JSON payload',
@@ -32,10 +33,8 @@ export class GetReleaseCommunityRatingController {
   })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid x-api-key' })
   getReleaseCommunityRating(
-    @Param('releaseId') releaseId: string,
-  ): Promise<GetReleaseCommunityRatingResult> {
-    return this.queryBus.execute(
-      new GetReleaseCommunityRatingQuery(releaseId),
-    );
+    @Query('releaseId') releaseId: string,
+  ): Promise<GetCommunityRatingResult> {
+    return this.queryBus.execute(new GetCommunityRatingQuery(releaseId));
   }
 }

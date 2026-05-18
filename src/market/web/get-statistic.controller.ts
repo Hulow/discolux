@@ -8,15 +8,15 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { GetReleaseStatisticQuery } from '../application/get-release-statistic.query';
-import { GetReleaseStatisticResult } from '../application/get-release-statistic.query-handler';
+import { GetStatisticQuery } from '../application/get-statistic.query';
+import { GetStatisticResult } from '../application/get-statistic.query-handler';
 import { ApiKeyGuard } from '../../shared/web/guards/api-key.guard';
 
-@ApiTags('release')
+@ApiTags('market')
 @ApiSecurity('x-api-key')
 @Controller('release')
 @UseGuards(ApiKeyGuard)
-export class GetReleaseStatisticController {
+export class GetStatisticController {
   constructor(private readonly queryBus: QueryBus) {}
 
   @Get('statistic')
@@ -36,7 +36,7 @@ export class GetReleaseStatisticController {
   @ApiUnauthorizedResponse({ description: 'Missing or invalid x-api-key' })
   getReleaseStatistic(
     @Query('releaseId') releaseId: string,
-  ): Promise<GetReleaseStatisticResult> {
-    return this.queryBus.execute(new GetReleaseStatisticQuery(releaseId));
+  ): Promise<GetStatisticResult> {
+    return this.queryBus.execute(new GetStatisticQuery(releaseId));
   }
 }

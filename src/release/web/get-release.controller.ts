@@ -1,15 +1,15 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { QueryBus } from '@nestjs/cqrs';
 import {
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { GetReleaseCommand } from '../application/get-release.command';
-import { GetReleaseResult } from '../application/get-release.command-handler';
+import { GetReleaseQuery } from '../application/get-release.query';
+import { GetReleaseResult } from '../application/get-release.query-handler';
 import { ApiKeyGuard } from '../../shared/web/guards/api-key.guard';
 
 @ApiTags('release')
@@ -17,21 +17,22 @@ import { ApiKeyGuard } from '../../shared/web/guards/api-key.guard';
 @Controller('release')
 @UseGuards(ApiKeyGuard)
 export class GetReleaseController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(private readonly queryBus: QueryBus) {}
 
-  @Get(':id')
+  @Get()
   @ApiOperation({ summary: 'Get a Discogs release by ID' })
-  @ApiParam({
+  @ApiQuery({
     name: 'id',
     description: 'Discogs release ID',
     example: '12345',
+    required: true,
   })
   @ApiOkResponse({
     description: 'Discogs release JSON payload',
     schema: { type: 'object', additionalProperties: true },
   })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid x-api-key' })
-  getRelease(@Param('id') id: string): Promise<GetReleaseResult> {
-    return this.commandBus.execute(new GetReleaseCommand(id));
+  getRelease(@Query('id') id: string): Promise<GetReleaseResult> {
+    return this.queryBus.execute(new GetReleaseQuery(id));
   }
 }
