@@ -1,18 +1,25 @@
 import type { ReleaseDiscogsClient } from '../../application/ports/release-discogs-client.port';
+import type {
+  DiscogsReleaseCommunityRatingResponse,
+  DiscogsReleaseResponse,
+} from './mappers/release-discogs.mapper';
 
 export class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
-  private defaultRelease: unknown = null;
-  private releases = new Map<string, unknown>();
+  private defaultRelease: DiscogsReleaseResponse | null = null;
+  private releases = new Map<string, DiscogsReleaseResponse>();
   private failures = new Map<string, Error>();
-  private rating: unknown = null;
+  private rating: DiscogsReleaseCommunityRatingResponse | null = null;
 
-  setRelease(release: unknown): void;
-  setRelease(releaseId: string, release: unknown): void;
-  setRelease(releaseOrId: unknown, release?: unknown): void {
-    if (release !== undefined) {
-      this.releases.set(releaseOrId as string, release);
-    } else {
-      this.defaultRelease = releaseOrId;
+  setRelease(release: DiscogsReleaseResponse): void;
+  setRelease(releaseId: string, release: DiscogsReleaseResponse): void;
+  setRelease(
+    releaseOrId: DiscogsReleaseResponse | string,
+    release?: DiscogsReleaseResponse,
+  ): void {
+    if (typeof releaseOrId === 'string' && release !== undefined) {
+      this.releases.set(releaseOrId, release);
+    } else if (release === undefined) {
+      this.defaultRelease = releaseOrId as DiscogsReleaseResponse;
     }
   }
 
@@ -20,11 +27,11 @@ export class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
     this.failures.set(releaseId, error);
   }
 
-  setRating(rating: unknown): void {
+  setRating(rating: DiscogsReleaseCommunityRatingResponse): void {
     this.rating = rating;
   }
 
-  getRelease(releaseId: string): Promise<unknown> {
+  getRelease(releaseId: string): Promise<DiscogsReleaseResponse> {
     const failure = this.failures.get(releaseId);
 
     if (failure) {
@@ -37,10 +44,12 @@ export class ReleaseDiscogsClientStub implements ReleaseDiscogsClient {
       return Promise.resolve(perId);
     }
 
-    return Promise.resolve(this.defaultRelease);
+    return Promise.resolve(this.defaultRelease ?? {});
   }
 
-  getReleaseCommunityRating(_releaseId: string): Promise<unknown> {
-    return Promise.resolve(this.rating);
+  getReleaseCommunityRating(
+    _releaseId: string,
+  ): Promise<DiscogsReleaseCommunityRatingResponse> {
+    return Promise.resolve(this.rating ?? {});
   }
 }

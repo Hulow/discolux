@@ -1,6 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetReleasesInBatchQuery } from './get-releases-in-batch.query';
+import type { DiscogsReleaseResponse } from '../infrastructure/discogs/mappers/release-discogs.mapper';
 import {
   RELEASE_DISCOGS_CLIENT,
   ReleaseDiscogsClient,
@@ -11,7 +12,10 @@ export type BatchReleaseError = {
   errorMessage: string;
 };
 
-export type GetReleasesInBatchResult = (unknown | BatchReleaseError)[];
+export type GetReleasesInBatchResult = (
+  | DiscogsReleaseResponse
+  | BatchReleaseError
+)[];
 
 @QueryHandler(GetReleasesInBatchQuery)
 export class GetReleasesInBatchQueryHandler
@@ -34,7 +38,9 @@ export class GetReleasesInBatchQueryHandler
     return Promise.all(ids.map((id) => this.fetchRelease(id)));
   }
 
-  private fetchRelease(releaseId: string): Promise<unknown | BatchReleaseError> {
+  private fetchRelease(
+    releaseId: string,
+  ): Promise<DiscogsReleaseResponse | BatchReleaseError> {
     return this.discogsClient.getRelease(releaseId).catch((error: unknown) => ({
       releaseId,
       errorMessage: error instanceof Error ? error.message : String(error),

@@ -1,12 +1,13 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetCommunityRatingQuery } from './get-community-rating.query';
+import type { DiscogsReleaseCommunityRatingResponse } from '../infrastructure/discogs/mappers/release-discogs.mapper';
 import {
   RELEASE_DISCOGS_CLIENT,
   ReleaseDiscogsClient,
 } from './ports/release-discogs-client.port';
 
-export type GetCommunityRatingResult = unknown;
+export type GetCommunityRatingResult = DiscogsReleaseCommunityRatingResponse;
 
 @QueryHandler(GetCommunityRatingQuery)
 export class GetCommunityRatingQueryHandler

@@ -1,12 +1,13 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetListingQuery } from './get-listing.query';
+import type { DiscogsMarketplaceListingResponse } from '../infrastructure/discogs/mappers/market-discogs.mapper';
 import {
   MARKET_DISCOGS_CLIENT,
   MarketDiscogsClient,
 } from './ports/market-discogs-client.port';
 
-export type GetListingResult = unknown;
+export type GetListingResult = DiscogsMarketplaceListingResponse;
 
 @QueryHandler(GetListingQuery)
 export class GetListingQueryHandler

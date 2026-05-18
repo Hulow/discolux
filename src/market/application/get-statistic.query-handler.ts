@@ -1,12 +1,13 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetStatisticQuery } from './get-statistic.query';
+import type { DiscogsReleaseMarketplaceStatsResponse } from '../infrastructure/discogs/mappers/market-discogs.mapper';
 import {
   MARKET_DISCOGS_CLIENT,
   MarketDiscogsClient,
 } from './ports/market-discogs-client.port';
 
-export type GetStatisticResult = unknown;
+export type GetStatisticResult = DiscogsReleaseMarketplaceStatsResponse;
 
 @QueryHandler(GetStatisticQuery)
 export class GetStatisticQueryHandler
