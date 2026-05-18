@@ -82,4 +82,31 @@ describe('DiscogsHttpClient', () => {
 
     fetchMock.mockRestore();
   });
+
+  it('should_append_token_query_param_when_getting_release_marketplace_stats', async () => {
+    const client = createClient();
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          lowest_price: { value: 10, currency: 'USD' },
+          num_for_sale: 3,
+          blocked_from_sale: false,
+        }),
+      } as Response);
+
+    await client.getReleaseMarketplaceStats('12345');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `https://api.discogs.com/marketplace/stats/12345?token=${token}`,
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Accept: 'application/vnd.discogs.v2.discogs+json',
+        }),
+      }),
+    );
+
+    fetchMock.mockRestore();
+  });
 });

@@ -20,6 +20,10 @@ export class DiscogsHttpClient implements DiscogsClient {
     return this.request(`/marketplace/listings/${listingId}`);
   }
 
+  getReleaseMarketplaceStats(releaseId: string): Promise<unknown> {
+    return this.request(`/marketplace/stats/${releaseId}`);
+  }
+
   private async request(path: string): Promise<unknown> {
     const response = await fetch(this.buildUrl(path), {
       headers: {

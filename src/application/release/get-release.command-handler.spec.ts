@@ -20,6 +20,10 @@ class DiscogsClientStub implements DiscogsClient {
   getMarketplaceListing(_listingId: string): Promise<unknown> {
     return Promise.resolve(null);
   }
+
+  getReleaseMarketplaceStats(_releaseId: string): Promise<unknown> {
+    return Promise.resolve(null);
+  }
 }
 
 describe('GetReleaseCommandHandler', () => {
