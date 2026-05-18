@@ -4,6 +4,7 @@ import { ReleaseApplicationModule } from '../application/release-application.mod
 import { GetCommunityRatingController } from './get-community-rating.controller';
 import { GetReleasesInBatchController } from './get-releases-in-batch.controller';
 import { GetReleaseController } from './get-release.controller';
+import { ProcessReleasesInBatchController } from './process-releases-in-batch.controller';
 
 @Module({
   imports: [ReleaseApplicationModule],
@@ -11,6 +12,7 @@ import { GetReleaseController } from './get-release.controller';
     GetCommunityRatingController,
     GetReleasesInBatchController,
     GetReleaseController,
+    ProcessReleasesInBatchController,
   ],
   providers: [ApiKeyGuard],
 })

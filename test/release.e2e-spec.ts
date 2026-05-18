@@ -1,13 +1,17 @@
 import { INestApplication } from '@nestjs/common';
+import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Model } from 'mongoose';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { RELEASE_DISCOGS_CLIENT } from '../src/release/application/ports/release-discogs-client.port';
 import { ReleaseEntity } from '../src/release/domain/release.entity';
+import { Release } from '../src/release/infrastructure/mongo/release.schema';
 import { AppModule } from '../src/app.module';
 
 describe('Release (e2e)', () => {
   let app: INestApplication<App>;
+  let releaseModel: Model<Release>;
   const apiKey = 'test-api-key';
   const discogsRating = { rating: { average: 4.5, count: 10 } };
 
@@ -43,6 +47,8 @@ describe('Release (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+    releaseModel = moduleFixture.get(getModelToken(Release.name));
+    await releaseModel.deleteMany({});
   });
 
   afterEach(async () => {
@@ -131,6 +137,59 @@ describe('Release (e2e)', () => {
       .expect(400);
   });
 
+  it('POST /release/batch returns 401 without api key', () => {
+    return request(app.getHttpServer())
+      .post('/release/batch')
+      .query({ from: '1', till: '3' })
+      .expect(401);
+  });
+
+  it('POST /release/batch returns 400 when from is greater than till', () => {
+    return request(app.getHttpServer())
+      .post('/release/batch')
+      .query({ from: '61', till: '1' })
+      .set('x-api-key', apiKey)
+      .expect(400);
+  });
+
+  it('POST /release/batch returns 400 when range size exceeds 60', () => {
+    return request(app.getHttpServer())
+      .post('/release/batch')
+      .query({ from: '1', till: '61' })
+      .set('x-api-key', apiKey)
+      .expect(400);
+  });
+
+  it('POST /release/batch upserts releases into mongo and returns 204', async () => {
+    await request(app.getHttpServer())
+      .post('/release/batch')
+      .query({ from: '1', till: '3' })
+      .set('x-api-key', apiKey)
+      .expect(204);
+
+    const docs = await releaseModel
+      .find({ releaseId: { $in: [1, 2, 3] } })
+      .sort({ releaseId: 1 })
+      .lean();
+
+    expect(docs).toHaveLength(3);
+    expect(docs.map((doc) => doc.releaseId)).toEqual([1, 2, 3]);
+    expect(docs[0]).toMatchObject({
+      _id: 'e2e-release-1',
+      releaseId: 1,
+      createdAt: new Date('2020-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2020-01-01T00:00:00.000Z'),
+    });
+    expect(docs[1]).toMatchObject({
+      _id: 'e2e-release-2',
+      releaseId: 2,
+    });
+    expect(docs[2]).toMatchObject({
+      _id: 'e2e-release-3',
+      releaseId: 3,
+    });
+  });
+
   describe('when a release id fails upstream', () => {
     const discogsNotFoundError = new Error(
       'Discogs API request failed: 404 Not Found',
@@ -157,6 +216,8 @@ describe('Release (e2e)', () => {
 
       app = moduleFixture.createNestApplication();
       await app.init();
+      releaseModel = moduleFixture.get(getModelToken(Release.name));
+      await releaseModel.deleteMany({});
     });
 
     it('GET /release/batch returns 200 with error object for failed id', () => {
@@ -173,6 +234,34 @@ describe('Release (e2e)', () => {
           },
           releaseJson(3),
         ]);
+    });
+
+    it('POST /release/batch upserts stub for failed id and returns 204', async () => {
+      await request(app.getHttpServer())
+        .post('/release/batch')
+        .query({ from: '1', till: '3' })
+        .set('x-api-key', apiKey)
+        .expect(204);
+
+      const docs = await releaseModel
+        .find({ releaseId: { $in: [1, 2, 3] } })
+        .sort({ releaseId: 1 })
+        .lean();
+
+      expect(docs).toHaveLength(3);
+      expect(docs[0]).toMatchObject({
+        _id: 'e2e-release-1',
+        releaseId: 1,
+      });
+      expect(docs[0].status).toBeUndefined();
+      expect(docs[1].releaseId).toBe(2);
+      expect(docs[1].status).toBeUndefined();
+      expect(docs[1].year).toBeUndefined();
+      expect(docs[2]).toMatchObject({
+        _id: 'e2e-release-3',
+        releaseId: 3,
+      });
+      expect(docs[2].status).toBeUndefined();
     });
   });
 });
