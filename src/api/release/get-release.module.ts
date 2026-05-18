@@ -9,10 +9,10 @@ import { ApiKeyGuard } from './guards/api-key.guard';
 @Module({
   imports: [ReleaseApplicationModule],
   controllers: [
+    GetReleaseStatisticController,
     GetReleaseController,
     GetReleaseCommunityRatingController,
     GetReleaseListingController,
-    GetReleaseStatisticController,
   ],
   providers: [ApiKeyGuard],
 })

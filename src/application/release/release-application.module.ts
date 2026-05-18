@@ -3,6 +3,7 @@ import { DiscogsModule } from '../../infrastructure/discogs/discogs.module';
 import { GetReleaseCommandHandler } from './get-release.command-handler';
 import { GetReleaseCommunityRatingQueryHandler } from './get-release-community-rating.query-handler';
 import { GetReleaseListingQueryHandler } from './get-release-listing.query-handler';
+import { GetReleaseStatisticQueryHandler } from './get-release-statistic.query-handler';
 
 @Module({
   imports: [DiscogsModule],
@@ -10,6 +11,7 @@ import { GetReleaseListingQueryHandler } from './get-release-listing.query-handl
     GetReleaseCommandHandler,
     GetReleaseCommunityRatingQueryHandler,
     GetReleaseListingQueryHandler,
+    GetReleaseStatisticQueryHandler,
   ],
 })
 export class ReleaseApplicationModule {}

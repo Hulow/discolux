@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { GetReleaseStatisticQuery } from '../../application/release/get-release-statistic.query';
+import { GetReleaseStatisticResult } from '../../application/release/get-release-statistic.query-handler';
 import { ApiKeyGuard } from './guards/api-key.guard';
 
 @ApiTags('release')
@@ -35,7 +36,7 @@ export class GetReleaseStatisticController {
   @ApiUnauthorizedResponse({ description: 'Missing or invalid x-api-key' })
   getReleaseStatistic(
     @Query('releaseId') releaseId: string,
-  ): Promise<unknown> {
+  ): Promise<GetReleaseStatisticResult> {
     return this.queryBus.execute(new GetReleaseStatisticQuery(releaseId));
   }
 }
