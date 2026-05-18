@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 .vite/
 
 .cursor/
+
+# E2e in-memory Mongo URI (written by test/mongo-memory.ts)
+test/.mongo-uri

@@ -5,5 +5,8 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "globalSetup": "<rootDir>/mongo-memory.global-setup.ts",
+  "globalTeardown": "<rootDir>/mongo-memory.global-teardown.ts",
+  "setupFilesAfterEnv": ["<rootDir>/jest-e2e.setup.ts"]
 }
