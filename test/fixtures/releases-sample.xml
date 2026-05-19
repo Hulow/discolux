@@ -1,0 +1,21 @@
+<releases>
+<release id="1">
+  <title>Stockholm</title>
+  <genres><genre>Electronic</genre></genres>
+  <styles><style>Deep House</style></styles>
+  <country>Sweden</country>
+  <released>1999-03-00</released>
+</release>
+<release id="2">
+  <title>Knockin' Boots (Vol 2 Of 2)</title>
+  <genres><genre>Electronic</genre><genre>Techno</genre></genres>
+  <styles><style>Tech House</style><style>Minimal</style></styles>
+  <country>Sweden</country>
+  <released>1998-00-00</released>
+</release>
+<release id="3">
+  <title>Profound Sounds Vol. 1</title>
+  <country>US</country>
+  <released>1999-00-00</released>
+</release>
+</releases>
