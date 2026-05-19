@@ -5,6 +5,7 @@ import { GetReleaseQueryHandler } from './get-release.query-handler';
 import { GetCommunityRatingQueryHandler } from './get-community-rating.query-handler';
 import { GetReleasesInBatchQueryHandler } from './get-releases-in-batch.query-handler';
 import { ProcessReleasesInBatchCommandHandler } from './process-releases-in-batch.command-handler';
+import { UpsertReleaseCommandHandler } from './upsert-release.command-handler';
 
 @Module({
   imports: [ReleaseDiscogsModule, ReleaseMongoModule],
@@ -13,6 +14,7 @@ import { ProcessReleasesInBatchCommandHandler } from './process-releases-in-batc
     GetCommunityRatingQueryHandler,
     GetReleasesInBatchQueryHandler,
     ProcessReleasesInBatchCommandHandler,
+    UpsertReleaseCommandHandler,
   ],
 })
 export class ReleaseApplicationModule {}

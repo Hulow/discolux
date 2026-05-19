@@ -8,6 +8,7 @@ import { RELEASE_DISCOGS_CLIENT } from '../src/release/application/ports/release
 import { ReleaseEntity } from '../src/release/domain/release.entity';
 import { Release } from '../src/release/infrastructure/mongo/release.schema';
 import { AppModule } from '../src/app.module';
+import { configureApp } from '../src/configure-app';
 
 describe('Release (e2e)', () => {
   let app: INestApplication<App>;
@@ -46,6 +47,7 @@ describe('Release (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    configureApp(app);
     await app.init();
     releaseModel = moduleFixture.get(getModelToken(Release.name));
     await releaseModel.deleteMany({});
@@ -160,6 +162,73 @@ describe('Release (e2e)', () => {
       .expect(400);
   });
 
+  it('POST /release/upsert returns 401 without api key', () => {
+    return request(app.getHttpServer())
+      .post('/release/upsert')
+      .send({ id: 1 })
+      .expect(401);
+  });
+
+  it('POST /release/upsert returns 400 when id is missing', () => {
+    return request(app.getHttpServer())
+      .post('/release/upsert')
+      .set('x-api-key', apiKey)
+      .send({ country: 'Sweden' })
+      .expect(400);
+  });
+
+  it('POST /release/upsert returns 400 when id is not an integer', () => {
+    return request(app.getHttpServer())
+      .post('/release/upsert')
+      .set('x-api-key', apiKey)
+      .send({ id: 'not-an-integer' })
+      .expect(400);
+  });
+
+  it('POST /release/upsert upserts dump fields into mongo and returns 204', async () => {
+    await request(app.getHttpServer())
+      .post('/release/upsert')
+      .set('x-api-key', apiKey)
+      .send({
+        id: 1,
+        country: 'Sweden',
+        released: '1999-03-00',
+        genres: ['Electronic'],
+        styles: ['Deep House'],
+      })
+      .expect(204);
+
+    const doc = await releaseModel.findOne({ releaseId: 1 }).lean();
+
+    expect(doc).toMatchObject({
+      releaseId: 1,
+      country: 'Sweden',
+      released: '1999-03-00',
+      genres: ['Electronic'],
+      styles: ['Deep House'],
+    });
+    expect(doc?._id).toEqual(expect.any(String));
+    expect(doc?.createdAt).toEqual(expect.any(Date));
+    expect(doc?.updatedAt).toEqual(expect.any(Date));
+  });
+
+  it('POST /release/upsert returns 204 without writing when genres are not electronic only', async () => {
+    await request(app.getHttpServer())
+      .post('/release/upsert')
+      .set('x-api-key', apiKey)
+      .send({
+        id: 99,
+        country: 'Sweden',
+        released: '1999-03-00',
+        genres: ['Rock', 'Folk, World, & Country'],
+        styles: ['Deep House'],
+      })
+      .expect(204);
+
+    const doc = await releaseModel.findOne({ releaseId: 99 }).lean();
+    expect(doc).toBeNull();
+  });
+
   it('POST /release/batch upserts releases into mongo and returns 204', async () => {
     await request(app.getHttpServer())
       .post('/release/batch')
@@ -215,6 +284,7 @@ describe('Release (e2e)', () => {
         .compile();
 
       app = moduleFixture.createNestApplication();
+      configureApp(app);
       await app.init();
       releaseModel = moduleFixture.get(getModelToken(Release.name));
       await releaseModel.deleteMany({});
