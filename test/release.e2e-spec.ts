@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Model } from 'mongoose';
+import { join } from 'path';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { RELEASE_DISCOGS_CLIENT } from '../src/release/application/ports/release-discogs-client.port';
@@ -162,71 +163,58 @@ describe('Release (e2e)', () => {
       .expect(400);
   });
 
-  it('POST /release/upsert returns 401 without api key', () => {
-    return request(app.getHttpServer())
-      .post('/release/upsert')
-      .send({ id: 1 })
-      .expect(401);
-  });
+  describe('POST /release/dump', () => {
+    const releasesFixturePath = join(
+      __dirname,
+      'fixtures/releases-sample.xml',
+    );
 
-  it('POST /release/upsert returns 400 when id is missing', () => {
-    return request(app.getHttpServer())
-      .post('/release/upsert')
-      .set('x-api-key', apiKey)
-      .send({ country: 'Sweden' })
-      .expect(400);
-  });
+    beforeEach(() => {
+      process.env.DISCOGS_RELEASES_XML_PATH = releasesFixturePath;
+    });
 
-  it('POST /release/upsert returns 400 when id is not an integer', () => {
-    return request(app.getHttpServer())
-      .post('/release/upsert')
-      .set('x-api-key', apiKey)
-      .send({ id: 'not-an-integer' })
-      .expect(400);
-  });
+    afterEach(() => {
+      delete process.env.DISCOGS_RELEASES_XML_PATH;
+    });
 
-  it('POST /release/upsert upserts dump fields into mongo and returns 204', async () => {
-    await request(app.getHttpServer())
-      .post('/release/upsert')
-      .set('x-api-key', apiKey)
-      .send({
-        id: 1,
+    it('returns 401 without api key', () => {
+      return request(app.getHttpServer())
+        .post('/release/dump')
+        .expect(401);
+    });
+
+    it('upserts electronic-only rows from fixture and returns 204', async () => {
+      await request(app.getHttpServer())
+        .post('/release/dump')
+        .set('x-api-key', apiKey)
+        .expect(204);
+
+      const doc = await releaseModel.findOne({ releaseId: 1 }).lean();
+
+      expect(doc).toMatchObject({
+        releaseId: 1,
         country: 'Sweden',
         released: '1999-03-00',
         genres: ['Electronic'],
         styles: ['Deep House'],
-      })
-      .expect(204);
-
-    const doc = await releaseModel.findOne({ releaseId: 1 }).lean();
-
-    expect(doc).toMatchObject({
-      releaseId: 1,
-      country: 'Sweden',
-      released: '1999-03-00',
-      genres: ['Electronic'],
-      styles: ['Deep House'],
+      });
+      expect(doc?._id).toEqual(expect.any(String));
+      expect(doc?.createdAt).toEqual(expect.any(Date));
+      expect(doc?.updatedAt).toEqual(expect.any(Date));
     });
-    expect(doc?._id).toEqual(expect.any(String));
-    expect(doc?.createdAt).toEqual(expect.any(Date));
-    expect(doc?.updatedAt).toEqual(expect.any(Date));
-  });
 
-  it('POST /release/upsert returns 204 without writing when genres are not electronic only', async () => {
-    await request(app.getHttpServer())
-      .post('/release/upsert')
-      .set('x-api-key', apiKey)
-      .send({
-        id: 99,
-        country: 'Sweden',
-        released: '1999-03-00',
-        genres: ['Rock', 'Folk, World, & Country'],
-        styles: ['Deep House'],
-      })
-      .expect(204);
+    it('does not write skipped fixture releases', async () => {
+      await request(app.getHttpServer())
+        .post('/release/dump')
+        .set('x-api-key', apiKey)
+        .expect(204);
 
-    const doc = await releaseModel.findOne({ releaseId: 99 }).lean();
-    expect(doc).toBeNull();
+      const skipped = await releaseModel
+        .find({ releaseId: { $in: [2, 3] } })
+        .lean();
+
+      expect(skipped).toHaveLength(0);
+    });
   });
 
   it('POST /release/batch upserts releases into mongo and returns 204', async () => {

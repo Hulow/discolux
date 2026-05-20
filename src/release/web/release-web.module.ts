@@ -5,7 +5,7 @@ import { GetCommunityRatingController } from './get-community-rating.controller'
 import { GetReleasesInBatchController } from './get-releases-in-batch.controller';
 import { GetReleaseController } from './get-release.controller';
 import { ProcessReleasesInBatchController } from './process-releases-in-batch.controller';
-import { UpsertReleaseController } from './upsert-release.controller';
+import { DumpReleaseController } from './dump-release.controller';
 
 @Module({
   imports: [ReleaseApplicationModule],
@@ -14,7 +14,7 @@ import { UpsertReleaseController } from './upsert-release.controller';
     GetReleasesInBatchController,
     GetReleaseController,
     ProcessReleasesInBatchController,
-    UpsertReleaseController,
+    DumpReleaseController,
   ],
   providers: [ApiKeyGuard],
 })

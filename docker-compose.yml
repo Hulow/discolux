@@ -17,7 +17,12 @@ services:
       - 3000:3000
     depends_on:
       - mongo
-  
+    volumes:
+      # Host path must match DISCOGS_RELEASES_XML_PATH (default: data/discogs_20260501_releases.xml)
+      - ./data:/usr/src/app/data:ro
+      # Optional: use test/fixtures/releases-sample.xml in .env for a small local smoke test
+      - ./test/fixtures:/usr/src/app/test/fixtures:ro
+
   mongo:
     image: mongo:8
     restart: always
