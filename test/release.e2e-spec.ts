@@ -147,6 +147,19 @@ describe('Release (e2e)', () => {
       .expect(401);
   });
 
+  it('POST /release/schedule-releases returns 401 without api key', () => {
+    return request(app.getHttpServer())
+      .post('/release/schedule-releases')
+      .expect(401);
+  });
+
+  it('POST /release/schedule-releases returns 204 with valid api key', () => {
+    return request(app.getHttpServer())
+      .post('/release/schedule-releases')
+      .set('x-api-key', apiKey)
+      .expect(204);
+  });
+
   it('POST /release/batch returns 400 when from is greater than till', () => {
     return request(app.getHttpServer())
       .post('/release/batch')

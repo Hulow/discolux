@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ScheduleModule } from '@nestjs/schedule';
 import { MarketWebModule } from './market/web/market-web.module';
 import { ReleaseWebModule } from './release/web/release-web.module';
 import { SharedMongoModule } from './shared/infrastructure/mongo/shared-mongo.module';
@@ -10,6 +11,7 @@ import { HealthModule } from './shared/web/health/health.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     CqrsModule.forRoot(),
+    ScheduleModule.forRoot(),
     SharedMongoModule,
     HealthModule,
     MarketWebModule,
