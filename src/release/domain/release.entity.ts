@@ -13,7 +13,7 @@ export type ReleaseEntityProps = {
   numberForSale?: number;
   lowestPrice?: number;
   country?: string;
-  released?: string;
+  released?: Date;
   notes?: string;
   releaseFormatted?: string;
   genres?: string[];
@@ -38,7 +38,7 @@ export class ReleaseEntity {
   public readonly numberForSale?: number;
   public readonly lowestPrice?: number;
   public readonly country?: string;
-  public readonly released?: string;
+  public readonly released?: Date;
   public readonly notes?: string;
   public readonly releaseFormatted?: string;
   public readonly genres?: string[];

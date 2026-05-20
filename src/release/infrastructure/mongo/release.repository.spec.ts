@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ReleaseEntity } from '../../domain/release.entity';
 import { releaseEntityToDocument } from './mappers/release.mapper';
 import { ReleaseRepository } from './release.repository';
@@ -79,6 +79,7 @@ describe('ReleaseRepository', () => {
               _id: fullDoc._id,
               releaseId: fullDoc.releaseId,
               createdAt: fullDoc.createdAt,
+              mongoId: expect.any(Types.ObjectId),
             },
           },
           upsert: true,
@@ -95,6 +96,7 @@ describe('ReleaseRepository', () => {
             $setOnInsert: {
               _id: stubDoc._id,
               createdAt: stubDoc.createdAt,
+              mongoId: expect.any(Types.ObjectId),
             },
           },
           upsert: true,

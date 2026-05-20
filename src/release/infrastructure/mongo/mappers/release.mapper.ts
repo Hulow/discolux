@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import {
   ReleaseEntity,
   type ReleaseEntityProps,
@@ -6,6 +7,7 @@ import {
 export type ReleaseDocumentData = {
   _id: string;
   releaseId: number;
+  mongoId?: Types.ObjectId;
   status?: string;
   year?: number;
   url?: string;
@@ -18,7 +20,7 @@ export type ReleaseDocumentData = {
   numberForSale?: number;
   lowestPrice?: number;
   country?: string;
-  released?: string;
+  released?: Date;
   notes?: string;
   releaseFormatted?: string;
   genres?: string[];

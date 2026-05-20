@@ -20,7 +20,7 @@ describe('release.mapper', () => {
     numberForSale: 3,
     lowestPrice: 9.99,
     country: 'US',
-    released: '1984',
+    released: new Date('1984-01-01T00:00:00.000Z'),
     notes: 'Test notes',
     releaseFormatted: 'Jan 1, 1984',
     genres: ['Rock'],

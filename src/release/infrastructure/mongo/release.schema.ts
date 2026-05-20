@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
 export type ReleaseDocument = HydratedDocument<Release>;
 
@@ -10,6 +10,9 @@ export class Release {
 
   @Prop({ type: Number, required: true, index: true })
   releaseId: number;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId })
+  mongoId?: mongoose.Types.ObjectId;
 
   @Prop({ type: String })
   status?: string;
@@ -47,8 +50,8 @@ export class Release {
   @Prop({ type: String })
   country?: string;
 
-  @Prop({ type: String })
-  released?: string;
+  @Prop({ type: Date })
+  released?: Date;
 
   @Prop({ type: String })
   notes?: string;

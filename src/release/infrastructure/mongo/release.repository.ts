@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import type { ReleaseRepository as ReleaseRepositoryPort } from '../../application/ports/release-repository.port';
 import { ReleaseEntity } from '../../domain/release.entity';
 import {
@@ -48,6 +48,10 @@ function definedFieldsExcept(
   return result;
 }
 
+function mongoIdOnInsert(): { mongoId: Types.ObjectId } {
+  return { mongoId: new Types.ObjectId() };
+}
+
 function buildUpsertOperation(entity: ReleaseEntity) {
   const doc = releaseEntityToDocument(entity);
   const filter = { releaseId: doc.releaseId };
@@ -55,6 +59,7 @@ function buildUpsertOperation(entity: ReleaseEntity) {
     _id: doc._id,
     releaseId: doc.releaseId,
     createdAt: doc.createdAt,
+    ...mongoIdOnInsert(),
   };
 
   if (isStubEntity(entity)) {
@@ -69,6 +74,7 @@ function buildUpsertOperation(entity: ReleaseEntity) {
           $setOnInsert: {
             _id: doc._id,
             createdAt: doc.createdAt,
+            ...mongoIdOnInsert(),
           },
         },
         upsert: true,

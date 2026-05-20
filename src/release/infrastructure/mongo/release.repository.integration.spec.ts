@@ -2,7 +2,7 @@ import { ConfigModule } from '@nestjs/config';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { SharedMongoModule } from '../../../shared/infrastructure/mongo/shared-mongo.module';
 import {
   RELEASE_REPOSITORY,
@@ -39,7 +39,7 @@ describe('ReleaseRepository (integration)', () => {
       numberForSale: 3,
       lowestPrice: 9.99,
       country: 'US',
-      released: '1984',
+      released: new Date('1984-01-01T00:00:00.000Z'),
       notes: 'Test notes',
       releaseFormatted: 'Jan 1, 1984',
       genres: ['Rock'],
@@ -100,5 +100,74 @@ describe('ReleaseRepository (integration)', () => {
 
     const count = await releaseModel.countDocuments();
     expect(count).toBe(2);
+  });
+
+  it('should_set_mongoId_on_upsert_insert_for_stub_entity', async () => {
+    const entity = ReleaseEntity.from({
+      id: '660e8400-e29b-41d4-a716-446655440001',
+      releaseId: 99,
+      createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-07-01T00:00:00.000Z'),
+    });
+
+    await repository.upsertReleases([entity]);
+
+    const stored = await releaseModel.findOne({ releaseId: 99 }).lean();
+    expect(stored?.mongoId).toEqual(expect.any(Types.ObjectId));
+    expect(stored?.released).toBeUndefined();
+  });
+
+  it('should_persist_mongoId_and_released_on_upsert_insert', async () => {
+    const released = new Date('1990-01-01T00:00:00.000Z');
+    const entity = ReleaseEntity.from({
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      releaseId: 12345,
+      country: 'Sweden',
+      released,
+      genres: ['Electronic'],
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-06-01T00:00:00.000Z'),
+    });
+
+    await repository.upsertReleases([entity]);
+
+    const stored = await releaseModel.findOne({ releaseId: 12345 }).lean();
+    expect(stored?.mongoId).toEqual(expect.any(Types.ObjectId));
+    expect(stored?.released).toEqual(released);
+    expect(stored?.released).toBeInstanceOf(Date);
+  });
+
+  it('should_preserve_mongoId_and_id_when_same_releaseId_re_upserted', async () => {
+    const released1 = new Date('1990-01-01T00:00:00.000Z');
+    const first = ReleaseEntity.from({
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      releaseId: 12345,
+      released: released1,
+      genres: ['Electronic'],
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-06-01T00:00:00.000Z'),
+    });
+
+    await repository.upsertReleases([first]);
+    const afterFirst = await releaseModel.findOne({ releaseId: 12345 }).lean();
+    const mongoId = afterFirst?.mongoId;
+    const id = afterFirst?._id;
+
+    const released2 = new Date('1900-03-01T00:00:00.000Z');
+    const second = ReleaseEntity.from({
+      id: '660e8400-e29b-41d4-a716-446655440001',
+      releaseId: 12345,
+      released: released2,
+      genres: ['Electronic'],
+      createdAt: new Date('2025-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2025-06-01T00:00:00.000Z'),
+    });
+
+    await repository.upsertReleases([second]);
+    const afterSecond = await releaseModel.findOne({ releaseId: 12345 }).lean();
+
+    expect(afterSecond?._id).toBe(id);
+    expect(afterSecond?.mongoId).toEqual(mongoId);
+    expect(afterSecond?.released).toEqual(released2);
   });
 });

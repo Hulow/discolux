@@ -207,7 +207,7 @@ describe('Release (e2e)', () => {
       expect(doc).toMatchObject({
         releaseId: 1,
         country: 'Sweden',
-        released: '1999-03-00',
+        released: new Date('1990-01-01T00:00:00.000Z'),
         genres: ['Electronic'],
         styles: ['Deep House'],
       });

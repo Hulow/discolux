@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { parseReleasedDate } from '../domain/parse-released-date';
 import { ReleaseEntity } from '../domain/release.entity';
 import { DumpReleaseCommand } from './dump-release.command';
 import type { ParsedDumpRelease } from './ports/release-dump-xml-streamer.port';
@@ -56,6 +57,8 @@ export class DumpReleaseCommandHandler
         return;
       }
 
+      console.log(`DumpReleaseCommandHandler | [${new Date().toISOString()}]: About to upsert releaseId`, entity.releaseId);
+
       batch.push(entity);
 
       if (batch.length >= DUMP_BATCH_SIZE) {
@@ -84,7 +87,7 @@ function toReleaseEntity(row: ParsedDumpRelease): ReleaseEntity | null {
     id: randomUUID(),
     releaseId: row.releaseId,
     country: row.country ?? undefined,
-    released: row.released ?? undefined,
+    released: parseReleasedDate(row.released),
     genres: row.genres,
     styles: row.styles.length > 0 ? row.styles : undefined,
     notes: row.notes ?? undefined,

@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { parseReleasedDate } from '../../../domain/parse-released-date';
 import {
   ReleaseEntity,
   type ReleaseEntityProps,
@@ -29,7 +30,7 @@ export function discogsReleaseToEntityProps(
     numberForSale: dto.num_for_sale,
     lowestPrice: dto.lowest_price,
     country: dto.country,
-    released: dto.released,
+    released: parseReleasedDate(dto.released),
     notes: dto.notes,
     releaseFormatted: dto.released_formatted,
     genres: filterStrings(dto.genres),

@@ -45,7 +45,7 @@ describe('release-entity.mapper', () => {
     expect(props.numberForSale).toBe(3);
     expect(props.lowestPrice).toBe(9.99);
     expect(props.country).toBe('US');
-    expect(props.released).toBe('1984');
+    expect(props.released).toEqual(new Date('1984-01-01T00:00:00.000Z'));
     expect(props.notes).toBe('Test notes');
     expect(props.releaseFormatted).toBe('Jan 1, 1984');
     expect(props.genres).toEqual(['Rock']);

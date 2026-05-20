@@ -66,7 +66,7 @@ describe('DumpReleaseCommandHandler', () => {
     streamedRows = [
       electronicRow(1, {
         country: 'Sweden',
-        released: '1999-03-00',
+        released: '1990',
         styles: ['Deep House'],
       }),
     ];
@@ -78,9 +78,29 @@ describe('DumpReleaseCommandHandler', () => {
     expect(entities).toHaveLength(1);
     expect(entities[0].releaseId).toBe(1);
     expect(entities[0].country).toBe('Sweden');
-    expect(entities[0].released).toBe('1999-03-00');
+    expect(entities[0].released).toEqual(new Date('1990-01-01T00:00:00.000Z'));
     expect(entities[0].genres).toEqual(['Electronic']);
     expect(entities[0].styles).toEqual(['Deep House']);
+  });
+
+  it('should_parse_iso_released_date_when_streamed', async () => {
+    streamedRows = [electronicRow(1, { released: '1900-03-01' })];
+
+    await handler.execute(new DumpReleaseCommand());
+
+    const [entities] = upsertReleases.mock.calls[0] as [ReleaseEntity[]];
+    expect(entities[0].released).toEqual(
+      new Date('1900-03-01T00:00:00.000Z'),
+    );
+  });
+
+  it('should_omit_released_when_streamed_value_is_unparseable', async () => {
+    streamedRows = [electronicRow(1, { released: '1999-03-00' })];
+
+    await handler.execute(new DumpReleaseCommand());
+
+    const [entities] = upsertReleases.mock.calls[0] as [ReleaseEntity[]];
+    expect(entities[0].released).toBeUndefined();
   });
 
   it('should_upsert_entity_when_electronic_is_one_of_multiple_genres', async () => {
