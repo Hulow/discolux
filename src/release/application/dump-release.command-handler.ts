@@ -17,8 +17,8 @@ import {
 const DUMP_BATCH_SIZE = 5000;
 const DISCOGS_RELEASES_XML_PATH = 'DISCOGS_RELEASES_XML_PATH';
 
-function isElectronicGenreOnly(genres: string[]): boolean {
-  return genres.length === 1 && genres[0] === 'Electronic';
+function hasElectronicGenre(genres: string[]): boolean {
+  return genres.includes('Electronic');
 }
 
 @CommandHandler(DumpReleaseCommand)
@@ -74,7 +74,7 @@ export class DumpReleaseCommandHandler
 }
 
 function toReleaseEntity(row: ParsedDumpRelease): ReleaseEntity | null {
-  if (!isElectronicGenreOnly(row.genres)) {
+  if (!hasElectronicGenre(row.genres)) {
     return null;
   }
 

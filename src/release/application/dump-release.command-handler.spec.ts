@@ -62,7 +62,7 @@ describe('DumpReleaseCommandHandler', () => {
     );
   });
 
-  it('should_upsert_entity_when_streamed_genres_are_electronic_only', async () => {
+  it('should_upsert_entity_when_streamed_genres_include_electronic', async () => {
     streamedRows = [
       electronicRow(1, {
         country: 'Sweden',
@@ -83,10 +83,20 @@ describe('DumpReleaseCommandHandler', () => {
     expect(entities[0].styles).toEqual(['Deep House']);
   });
 
-  it('should_not_upsert_when_streamed_genres_are_not_electronic_only', async () => {
+  it('should_upsert_entity_when_electronic_is_one_of_multiple_genres', async () => {
+    streamedRows = [electronicRow(1, { genres: ['Electronic', 'Techno'] })];
+
+    await handler.execute(new DumpReleaseCommand());
+
+    expect(upsertReleases).toHaveBeenCalledTimes(1);
+    const [entities] = upsertReleases.mock.calls[0] as [ReleaseEntity[]];
+    expect(entities[0].genres).toEqual(['Electronic', 'Techno']);
+  });
+
+  it('should_not_upsert_when_streamed_genres_do_not_include_electronic', async () => {
     streamedRows = [
       electronicRow(1, { genres: ['Rock'] }),
-      electronicRow(2, { genres: ['Electronic', 'Techno'] }),
+      electronicRow(2, { genres: ['Techno'] }),
       electronicRow(3, { genres: [] }),
     ];
 
